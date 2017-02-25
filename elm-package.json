@@ -1,7 +1,7 @@
 {
     "version": "0.0.1",
     "summary": "Water writing",
-    "repository": "git@github.com:Soreine/water-writing.git",
+    "repository": "https://github.com/Soreine/water-writing.git",
     "license": "MIT",
     "source-directories": [
         "."
