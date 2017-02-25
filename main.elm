@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, div, input, text)
+import Html exposing (Html, Attribute, div, span, input, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on)
 import Json.Decode as Decode
@@ -49,11 +49,20 @@ view model =
     div
         [ on "click" (Decode.map ClickAt decodeClickLocation)
         , style
-            [ ( "height", "100%" )
+            [ ( "position", "relative" )
+            , ( "height", "100%" )
             , ( "width", "100%" )
             ]
         ]
-        []
+        [ span
+            [ style
+                [ ( "left", (model.location |> Tuple.first |> toString) ++ "px" )
+                , ( "top", (model.location |> Tuple.second |> toString) ++ "px" )
+                , ( "position", "absolute" )
+                ]
+            ]
+            [ text <| toString model.location ]
+        ]
 
 
 
