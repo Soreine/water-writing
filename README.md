@@ -1,11 +1,11 @@
 # Water Writing
 
-To run locally, install `elm-reactor` and:
+To run locally, install Elm and:
 
 ```
-git clone git@github.com:Soreine/water-writing.git;
-cd water-writing/;
-elm-reactor;
+git clone git@github.com:Soreine/water-writing.git
+cd water-writing/
+elm-make main.elm --output main.js
 ```
 
-Visit `localhost:8000`.
+Open `index.htm` in your browser.
