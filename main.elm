@@ -48,17 +48,13 @@ view : Model -> Html Msg
 view model =
     div
         [ on "click" (Decode.map ClickAt decodeClickLocation)
-        , style
-            [ ( "position", "relative" )
-            , ( "height", "100%" )
-            , ( "width", "100%" )
-            ]
+        , id "wall"
         ]
         [ span
-            [ style
+            [ class "writing"
+            , style
                 [ ( "left", (model.location |> Tuple.first |> toString) ++ "px" )
                 , ( "top", (model.location |> Tuple.second |> toString) ++ "px" )
-                , ( "position", "absolute" )
                 ]
             ]
             [ text <| toString model.location ]
