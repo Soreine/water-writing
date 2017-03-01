@@ -16,7 +16,7 @@ main =
 
 
 type alias Model =
-    { location : ( Int, Int )
+    { location : Coord
     }
 
 
@@ -26,11 +26,19 @@ model =
 
 
 
+-- Integer coordinates
+
+
+type alias Coord =
+    ( Int, Int )
+
+
+
 -- UPDATE
 
 
 type Msg
-    = ClickAt ( Int, Int )
+    = ClickAt Coord
 
 
 update : Msg -> Model -> Model
@@ -47,25 +55,41 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div
-        [ on "click" (Decode.map ClickAt decodeClickLocation)
-        , id "wall"
+        [ id "wall"
+        , on "click" (Decode.map ClickAt decodeClickLocation)
         ]
         [ span
             [ class "writing"
-            , style
-                [ ( "left", (model.location |> Tuple.first |> toString) ++ "px" )
-                , ( "top", (model.location |> Tuple.second |> toString) ++ "px" )
-                ]
+            , stylePosition model.location
             ]
-            [ text <| toString model.location ]
+            [ cursor ]
         ]
+
+
+
+-- ELEMENTS
+
+
+cursor : Html Msg
+cursor =
+    span [ class "cursor" ] [ text "cursor" ]
 
 
 
 -- UTILS
 
 
-decodeClickLocation : Decode.Decoder ( Int, Int )
+{-| Style to position left and top to the given coords.
+-}
+stylePosition : Coord -> Attribute msg
+stylePosition ( x, y ) =
+    style
+        [ ( "left", (toString x) ++ "px" )
+        , ( "top", (toString y) ++ "px" )
+        ]
+
+
+decodeClickLocation : Decode.Decoder Coord
 decodeClickLocation =
     Decode.map2 (,)
         (Decode.map2 (-)
