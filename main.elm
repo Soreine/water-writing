@@ -62,7 +62,7 @@ view model =
             [ class "writing"
             , stylePosition model.location
             ]
-            [ cursor ]
+            [ cursor, text "oui" ]
         ]
 
 
@@ -72,7 +72,7 @@ view model =
 
 cursor : Html Msg
 cursor =
-    span [ class "cursor" ] [ text "cursor" ]
+    span [ class "cursor" ] []
 
 
 
