@@ -62,7 +62,7 @@ view model =
             [ class "writing"
             , stylePosition model.location
             ]
-            [ cursor, text "oui" ]
+            [ cursor, text " Will write here" ]
         ]
 
 
