@@ -5,6 +5,7 @@ elm.js
 main.js
 
 # gh-pages deployment
+node_modules/
 dist/
 
 # temporary files
