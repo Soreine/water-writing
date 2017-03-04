@@ -1,5 +1,7 @@
 # Water Writing
 
+
+## Running
 To run locally, install Elm and:
 
 ```
@@ -8,4 +10,9 @@ cd water-writing/
 elm-make main.elm --output main.js
 ```
 
-Open `index.htm` in your browser.
+Open `index.html` in your browser.
+
+## Deploying to gh-pages
+
+Have NPM installed and run `npm install` once. Run `npm run deploy` to build using Elm, and deploy to gh-pages.
+
