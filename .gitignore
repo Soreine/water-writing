@@ -4,6 +4,9 @@ repl-temp-*
 elm.js
 main.js
 
+# gh-pages deployment
+dist/
+
 # temporary files
 *.swp
 

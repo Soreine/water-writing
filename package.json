@@ -1,0 +1,25 @@
+{
+    "name": "water-writing",
+    "version": "0.0.0",
+    "description": "This is just for build script",
+    "main": "",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Soreine/water-writing.git"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Soreine/water-writing/issues"
+    },
+    "homepage": "https://github.com/Soreine/water-writing#readme",
+    "scripts": {
+        "build": "elm-make main.elm --output dist/main.js && cp style.css index.html dist/",
+        "deploy": "npm run build && ./node_modules/.bin/gh-pages --dist dist/"
+    },
+    "devDependencies": {
+        "gh-pages": "^0.12.0"
+    }
+}
