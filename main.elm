@@ -4,11 +4,18 @@ import Html exposing (Html, Attribute, div, span, input, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, defaultOptions)
 import Json.Decode as Decode
+import Dom
+import Task
 
 
 main : Program Never Model Msg
 main =
-    Html.beginnerProgram { model = model, view = view, update = update }
+    Html.program
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = always Sub.none
+        }
 
 
 
@@ -30,6 +37,11 @@ model =
     }
 
 
+init : ( Model, Cmd Msg )
+init =
+    ( model, Cmd.none )
+
+
 
 -- Integer coordinates
 
@@ -46,23 +58,39 @@ type Msg
     = ClickAt Coord
     | TypeText String
     | BreakLine
+    | FocusOnInput
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickAt ( x, y ) ->
-            { model | location = ( x, y ) }
+            ( { model | location = ( x, y ) }
+            , focusInput
+            )
 
         TypeText text ->
-            { model | currentLine = text }
+            ( { model | currentLine = text }
+            , Cmd.none
+            )
 
         BreakLine ->
             -- Move current text to previous lines
-            { model
+            ( { model
                 | currentLine = ""
                 , lines = model.lines ++ [ model.currentLine ]
-            }
+              }
+            , Cmd.none
+            )
+
+        FocusOnInput ->
+            ( model, Cmd.none )
+
+
+focusInput : Cmd Msg
+focusInput =
+    Dom.focus "hidden-input"
+        |> Task.attempt (always FocusOnInput)
 
 
 
@@ -87,7 +115,7 @@ view model =
                     ++ [ cursor ]
                 )
             , input
-                [ class "hide"
+                [ id "hidden-input"
                 , autofocus True
                 , value model.currentLine
                 , onInput TypeText

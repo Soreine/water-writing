@@ -45,7 +45,7 @@
     100% { opacity:1; }
 }
 
-.hide {
+#hidden-input {
     position: absolute;
     overflow: hidden;
     clip: rect(0 0 0 0);

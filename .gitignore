@@ -10,6 +10,7 @@ dist/
 
 # temporary files
 *.swp
+*.orig
 
 
 # Created by https://www.gitignore.io/api/linux,osx,windows
