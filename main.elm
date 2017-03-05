@@ -1,8 +1,8 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, div, span, input, text)
+import Html exposing (Html, Attribute, div, span, input, text, br)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onInput)
+import Html.Events exposing (on, onInput, defaultOptions)
 import Json.Decode as Decode
 
 
@@ -17,14 +17,16 @@ main =
 
 type alias Model =
     { location : Coord
-    , text : String
+    , currentLine : String
+    , lines : List String
     }
 
 
 model : Model
 model =
     { location = ( 0, 0 )
-    , text = ""
+    , currentLine = ""
+    , lines = []
     }
 
 
@@ -43,6 +45,7 @@ type alias Coord =
 type Msg
     = ClickAt Coord
     | TypeText String
+    | BreakLine
 
 
 update : Msg -> Model -> Model
@@ -52,7 +55,14 @@ update msg model =
             { model | location = ( x, y ) }
 
         TypeText text ->
-            { model | text = text }
+            { model | currentLine = text }
+
+        BreakLine ->
+            -- Move current text to previous lines
+            { model
+                | currentLine = ""
+                , lines = model.lines ++ [ model.currentLine ]
+            }
 
 
 
@@ -61,24 +71,30 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ id "wall"
-        , on "click" (Decode.map ClickAt decodeClickLocation)
-        ]
-        [ span
-            [ class "writing"
-            , stylePosition model.location
+    let
+        written : List (Html Msg)
+        written =
+            (model.lines ++ [ model.currentLine ])
+                |> List.map text
+                |> List.intersperse (br [] [])
+    in
+        div
+            [ id "wall"
+            , on "click" (Decode.map ClickAt decodeClickLocation)
             ]
-            [ text model.text, cursor ]
-          -- test
-        , input
-            [ class "hide"
-            , autofocus True
-            , value model.text
-            , onInput TypeText
+            [ span [ class "writing", stylePosition model.location ]
+                (written
+                    ++ [ cursor ]
+                )
+            , input
+                [ class "hide"
+                , autofocus True
+                , value model.currentLine
+                , onInput TypeText
+                , onEnter BreakLine
+                ]
+                []
             ]
-            []
-        ]
 
 
 
@@ -115,3 +131,27 @@ decodeClickLocation =
             (Decode.at [ "pageY" ] Decode.int)
             (Decode.at [ "currentTarget", "offsetTop" ] Decode.int)
         )
+
+
+{-| Detect Enter input, and prevent default behavior.
+
+http://stackoverflow.com/questions/42390708/elm-conditional-preventdefault-with-contenteditable
+-}
+onEnter : msg -> Attribute msg
+onEnter msg =
+    let
+        options =
+            { defaultOptions | preventDefault = True }
+
+        filterKey code =
+            -- Enter
+            if code == 13 then
+                Decode.succeed msg
+            else
+                Decode.fail "ignored input"
+
+        decoder =
+            Html.Events.keyCode
+                |> Decode.andThen filterKey
+    in
+        Html.Events.onWithOptions "keydown" options decoder
