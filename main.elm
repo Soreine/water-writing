@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (Html, Attribute, div, span, input, text, br)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onInput, defaultOptions)
+import Html.Events exposing (on, onInput, onBlur, defaultOptions)
 import Json.Decode as Decode
 import Dom
 import Task
@@ -58,7 +58,8 @@ type Msg
     = ClickAt Coord
     | TypeText String
     | BreakLine
-    | FocusOnInput
+    | InputBlurred
+    | Nothing
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -83,14 +84,17 @@ update msg model =
             , Cmd.none
             )
 
-        FocusOnInput ->
+        InputBlurred ->
+            ( model, focusInput )
+
+        Nothing ->
             ( model, Cmd.none )
 
 
 focusInput : Cmd Msg
 focusInput =
     Dom.focus "hidden-input"
-        |> Task.attempt (always FocusOnInput)
+        |> Task.attempt (always Nothing)
 
 
 
@@ -114,14 +118,7 @@ view model =
                 (written
                     ++ [ cursor ]
                 )
-            , input
-                [ id "hidden-input"
-                , autofocus True
-                , value model.currentLine
-                , onInput TypeText
-                , onEnter BreakLine
-                ]
-                []
+            , hiddenInput model.currentLine
             ]
 
 
@@ -132,6 +129,21 @@ view model =
 cursor : Html Msg
 cursor =
     span [ class "cursor" ] []
+
+
+{-| Invisibile input used to capture text input. Always focused
+-}
+hiddenInput : String -> Html Msg
+hiddenInput val =
+    input
+        [ id "hidden-input"
+        , autofocus True
+        , value val
+        , onInput TypeText
+        , onEnter BreakLine
+        , onBlur InputBlurred
+        ]
+        []
 
 
 
