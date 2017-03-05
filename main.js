@@ -8759,10 +8759,10 @@ var _Soreine$water_writing$Main$Model = F3(
 	function (a, b, c) {
 		return {location: a, currentLine: b, lines: c};
 	});
-var _Soreine$water_writing$Main$FocusOnInput = {ctor: 'FocusOnInput'};
+var _Soreine$water_writing$Main$Nothing = {ctor: 'Nothing'};
 var _Soreine$water_writing$Main$focusInput = A2(
 	_elm_lang$core$Task$attempt,
-	_elm_lang$core$Basics$always(_Soreine$water_writing$Main$FocusOnInput),
+	_elm_lang$core$Basics$always(_Soreine$water_writing$Main$Nothing),
 	_elm_lang$dom$Dom$focus('hidden-input'));
 var _Soreine$water_writing$Main$update = F2(
 	function (msg, model) {
@@ -8804,13 +8804,46 @@ var _Soreine$water_writing$Main$update = F2(
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'InputBlurred':
+				return {ctor: '_Tuple2', _0: model, _1: _Soreine$water_writing$Main$focusInput};
 			default:
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
+var _Soreine$water_writing$Main$InputBlurred = {ctor: 'InputBlurred'};
 var _Soreine$water_writing$Main$BreakLine = {ctor: 'BreakLine'};
 var _Soreine$water_writing$Main$TypeText = function (a) {
 	return {ctor: 'TypeText', _0: a};
+};
+var _Soreine$water_writing$Main$hiddenInput = function (val) {
+	return A2(
+		_elm_lang$html$Html$input,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$id('hidden-input'),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$autofocus(true),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$value(val),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onInput(_Soreine$water_writing$Main$TypeText),
+						_1: {
+							ctor: '::',
+							_0: _Soreine$water_writing$Main$onEnter(_Soreine$water_writing$Main$BreakLine),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onBlur(_Soreine$water_writing$Main$InputBlurred),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			}
+		},
+		{ctor: '[]'});
 };
 var _Soreine$water_writing$Main$ClickAt = function (a) {
 	return {ctor: 'ClickAt', _0: a};
@@ -8870,30 +8903,7 @@ var _Soreine$water_writing$Main$view = function (model) {
 					})),
 			_1: {
 				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$input,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$id('hidden-input'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$autofocus(true),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$value(model.currentLine),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onInput(_Soreine$water_writing$Main$TypeText),
-									_1: {
-										ctor: '::',
-										_0: _Soreine$water_writing$Main$onEnter(_Soreine$water_writing$Main$BreakLine),
-										_1: {ctor: '[]'}
-									}
-								}
-							}
-						}
-					},
-					{ctor: '[]'}),
+				_0: _Soreine$water_writing$Main$hiddenInput(model.currentLine),
 				_1: {ctor: '[]'}
 			}
 		});
