@@ -2,7 +2,7 @@ module Main exposing (..)
 
 import Html exposing (Html, Attribute, div, span, input, text)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on)
+import Html.Events exposing (on, onInput)
 import Json.Decode as Decode
 
 
@@ -17,12 +17,15 @@ main =
 
 type alias Model =
     { location : Coord
+    , text : String
     }
 
 
 model : Model
 model =
-    { location = ( 0, 0 ) }
+    { location = ( 0, 0 )
+    , text = ""
+    }
 
 
 
@@ -39,6 +42,7 @@ type alias Coord =
 
 type Msg
     = ClickAt Coord
+    | TypeText String
 
 
 update : Msg -> Model -> Model
@@ -46,6 +50,9 @@ update msg model =
     case msg of
         ClickAt ( x, y ) ->
             { model | location = ( x, y ) }
+
+        TypeText text ->
+            { model | text = text }
 
 
 
@@ -62,7 +69,15 @@ view model =
             [ class "writing"
             , stylePosition model.location
             ]
-            [ cursor, text " Will write here" ]
+            [ text model.text, cursor ]
+          -- test
+        , input
+            [ class "hide"
+            , autofocus True
+            , value model.text
+            , onInput TypeText
+            ]
+            []
         ]
 
 
