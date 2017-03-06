@@ -8759,10 +8759,10 @@ var _Soreine$water_writing$Main$Model = F3(
 	function (a, b, c) {
 		return {location: a, currentLine: b, lines: c};
 	});
-var _Soreine$water_writing$Main$Nothing = {ctor: 'Nothing'};
+var _Soreine$water_writing$Main$NoOp = {ctor: 'NoOp'};
 var _Soreine$water_writing$Main$focusInput = A2(
 	_elm_lang$core$Task$attempt,
-	_elm_lang$core$Basics$always(_Soreine$water_writing$Main$Nothing),
+	_elm_lang$core$Basics$always(_Soreine$water_writing$Main$NoOp),
 	_elm_lang$dom$Dom$focus('hidden-input'));
 var _Soreine$water_writing$Main$update = F2(
 	function (msg, model) {
