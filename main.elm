@@ -59,7 +59,7 @@ type Msg
     | TypeText String
     | BreakLine
     | InputBlurred
-    | Nothing
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -87,14 +87,14 @@ update msg model =
         InputBlurred ->
             ( model, focusInput )
 
-        Nothing ->
+        NoOp ->
             ( model, Cmd.none )
 
 
 focusInput : Cmd Msg
 focusInput =
     Dom.focus "hidden-input"
-        |> Task.attempt (always Nothing)
+        |> Task.attempt (always NoOp)
 
 
 
