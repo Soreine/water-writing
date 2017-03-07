@@ -186,13 +186,24 @@ fadingText now dated =
 
         opacity =
             -- linear progression
-            (clamp 0 fadingDelay <| fadingDelay - age) / fadingDelay
+            1 - (progress 0 fadingDelay age)
     in
         span [ styleOpacity opacity ] [ text dated.value ]
 
 
 
 -- UTILS
+
+
+{-| Returns the progress (within [0, 1]) of a value, relative to a min and max. (Matthieu, better naming for this value?).
+-}
+progress : Float -> Float -> Float -> Float
+progress min max x =
+    let
+        normX =
+            clamp min max x
+    in
+        (normX - min) / (max - min)
 
 
 styleOpacity : number -> Attribute msg
