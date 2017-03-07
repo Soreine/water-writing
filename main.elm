@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
 import Json.Decode as Decode
 import AnimationFrame
-import Time exposing (Time)
+import Time exposing (Time, second)
 import Dom
 import Task
 
@@ -30,6 +30,14 @@ type alias Coord =
     ( Int, Int )
 
 
+{-| Dated values
+-}
+type alias Dated a =
+    { time : Time
+    , value : a
+    }
+
+
 
 -- MODEL
 
@@ -37,8 +45,8 @@ type alias Coord =
 type alias Model =
     { location : Coord
     , currentLine : String
-    , lines : List String
-    , time : Time
+    , lines : List (Dated String)
+    , now : Time
     }
 
 
@@ -47,7 +55,7 @@ model =
     { location = ( 0, 0 )
     , currentLine = ""
     , lines = []
-    , time = 0
+    , now = 0
     }
 
 
@@ -86,7 +94,7 @@ update msg model =
             -- Move current text to previous lines
             ( { model
                 | currentLine = ""
-                , lines = model.lines ++ [ model.currentLine ]
+                , lines = model.lines ++ [ { time = model.now, value = model.currentLine } ]
               }
             , Cmd.none
             )
@@ -95,7 +103,7 @@ update msg model =
             ( model, focusInput )
 
         Tick newTime ->
-            ( { model | time = newTime }
+            ( { model | now = newTime }
             , Cmd.none
             )
 
@@ -127,8 +135,8 @@ view model =
     let
         written : List (Html Msg)
         written =
-            (model.lines ++ [ model.currentLine ])
-                |> List.map text
+            (model.lines ++ [ { time = model.now, value = model.currentLine } ])
+                |> List.map (fadingText model.now)
                 |> List.intersperse (br [] [])
     in
         div
@@ -137,7 +145,7 @@ view model =
             ]
             [ span [ class "writing", stylePosition model.location ]
                 (written
-                    ++ [ cursor, text <| toString <| Time.inSeconds <| model.time ]
+                    ++ [ cursor ]
                 )
             , hiddenInput model.currentLine
             ]
@@ -167,8 +175,29 @@ hiddenInput val =
         []
 
 
+fadingText : Time -> Dated String -> Html Msg
+fadingText now dated =
+    let
+        age =
+            now - dated.time
+
+        fadingDelay =
+            3 * second
+
+        opacity =
+            -- linear progression
+            (clamp 0 fadingDelay <| fadingDelay - age) / fadingDelay
+    in
+        span [ styleOpacity opacity ] [ text dated.value ]
+
+
 
 -- UTILS
+
+
+styleOpacity : number -> Attribute msg
+styleOpacity opacity =
+    style [ ( "opacity", toString opacity ) ]
 
 
 {-| Style to position left and top to the given coords.
