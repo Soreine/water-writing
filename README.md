@@ -1,6 +1,7 @@
 # Water Writing
 
 See video below
+
 [![Youtube Video](https://img.youtube.com/vi/SXCXHed3GC8/0.jpg)](https://www.youtube.com/watch?v=SXCXHed3GC8&feature=youtu.be&t=40m37)
 
 ## Running
