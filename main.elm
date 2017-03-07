@@ -4,6 +4,8 @@ import Html exposing (Html, Attribute, div, span, input, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
 import Json.Decode as Decode
+import AnimationFrame
+import Time exposing (Time)
 import Dom
 import Task
 
@@ -14,8 +16,18 @@ main =
         { init = init
         , update = update
         , view = view
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
+
+
+
+-- TYPES
+
+
+{-| Integer coordinates
+-}
+type alias Coord =
+    ( Int, Int )
 
 
 
@@ -26,6 +38,7 @@ type alias Model =
     { location : Coord
     , currentLine : String
     , lines : List String
+    , time : Time
     }
 
 
@@ -34,20 +47,13 @@ model =
     { location = ( 0, 0 )
     , currentLine = ""
     , lines = []
+    , time = 0
     }
 
 
 init : ( Model, Cmd Msg )
 init =
     ( model, Cmd.none )
-
-
-
--- Integer coordinates
-
-
-type alias Coord =
-    ( Int, Int )
 
 
 
@@ -59,6 +65,7 @@ type Msg
     | TypeText String
     | BreakLine
     | InputBlurred
+    | Tick Time
     | NoOp
 
 
@@ -87,6 +94,11 @@ update msg model =
         InputBlurred ->
             ( model, focusInput )
 
+        Tick newTime ->
+            ( { model | time = newTime }
+            , Cmd.none
+            )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -95,6 +107,15 @@ focusInput : Cmd Msg
 focusInput =
     Dom.focus "hidden-input"
         |> Task.attempt (always NoOp)
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    AnimationFrame.times Tick
 
 
 
@@ -116,7 +137,7 @@ view model =
             ]
             [ span [ class "writing", stylePosition model.location ]
                 (written
-                    ++ [ cursor ]
+                    ++ [ cursor, text <| toString <| Time.inSeconds <| model.time ]
                 )
             , hiddenInput model.currentLine
             ]
