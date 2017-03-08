@@ -1,13 +1,13 @@
 module Main exposing (..)
 
+import AnimationFrame
+import Dom
 import Html exposing (Html, Attribute, div, span, input, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
 import Json.Decode as Decode
-import AnimationFrame
-import Time exposing (Time, second)
-import Dom
 import Task
+import Time exposing (Time, second)
 
 
 main : Program Never Model Msg
