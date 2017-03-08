@@ -24,12 +24,6 @@ main =
 -- TYPES
 
 
-{-| Integer coordinates
--}
-type alias Coord =
-    ( Int, Int )
-
-
 {-| Dated values
 -}
 type Dated a
@@ -41,8 +35,7 @@ type Dated a
 
 
 type alias Model =
-    { location : Coord
-    , currentLine : String
+    { currentLine : String
     , lines : List (Dated String)
     , now : Time
     }
@@ -50,8 +43,7 @@ type alias Model =
 
 model : Model
 model =
-    { location = ( 0, 0 )
-    , currentLine = ""
+    { currentLine = ""
     , lines = []
     , now = 0
     }
@@ -67,8 +59,7 @@ init =
 
 
 type Msg
-    = ClickAt Coord
-    | TypeText String
+    = TypeText String
     | BreakLine
     | InputBlurred
     | Tick Time
@@ -78,11 +69,6 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ClickAt ( x, y ) ->
-            ( { model | location = ( x, y ) }
-            , focusInput
-            )
-
         TypeText text ->
             ( { model | currentLine = text }
             , Cmd.none
@@ -137,11 +123,8 @@ view model =
                 |> List.map (fadingText model.now)
                 |> List.intersperse (br [] [])
     in
-        div
-            [ id "wall"
-            , on "click" (Decode.map ClickAt decodeClickLocation)
-            ]
-            [ span [ class "writing", stylePosition model.location ]
+        div [ id "wall" ]
+            [ span [ class "writing" ]
                 (written
                     ++ [ cursor ]
                 )
@@ -207,29 +190,6 @@ progress min max x =
 styleOpacity : number -> Attribute msg
 styleOpacity opacity =
     style [ ( "opacity", toString opacity ) ]
-
-
-{-| Style to position left and top to the given coords.
--}
-stylePosition : Coord -> Attribute msg
-stylePosition ( x, y ) =
-    style
-        [ ( "left", (toString x) ++ "px" )
-        , ( "top", (toString y) ++ "px" )
-        ]
-
-
-decodeClickLocation : Decode.Decoder Coord
-decodeClickLocation =
-    Decode.map2 (,)
-        (Decode.map2 (-)
-            (Decode.at [ "pageX" ] Decode.int)
-            (Decode.at [ "currentTarget", "offsetLeft" ] Decode.int)
-        )
-        (Decode.map2 (-)
-            (Decode.at [ "pageY" ] Decode.int)
-            (Decode.at [ "currentTarget", "offsetTop" ] Decode.int)
-        )
 
 
 {-| Detect Enter input, and prevent default behavior.

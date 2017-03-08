@@ -8,6 +8,10 @@
 
 .writing {
     position: absolute;
+    bottom: 30%;
+    left: 30%;
+    width: 40%;
+
     font-size: 3rem;
 }
 
