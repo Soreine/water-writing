@@ -32,10 +32,8 @@ type alias Coord =
 
 {-| Dated values
 -}
-type alias Dated a =
-    { time : Time
-    , value : a
-    }
+type Dated a
+    = Dated Time a
 
 
 
@@ -94,7 +92,7 @@ update msg model =
             -- Move current text to previous lines
             ( { model
                 | currentLine = ""
-                , lines = model.lines ++ [ { time = model.now, value = model.currentLine } ]
+                , lines = model.lines ++ [ Dated model.now model.currentLine ]
               }
             , Cmd.none
             )
@@ -135,7 +133,7 @@ view model =
     let
         written : List (Html Msg)
         written =
-            (model.lines ++ [ { time = model.now, value = model.currentLine } ])
+            (model.lines ++ [ Dated model.now model.currentLine ])
                 |> List.map (fadingText model.now)
                 |> List.intersperse (br [] [])
     in
@@ -176,19 +174,19 @@ hiddenInput val =
 
 
 fadingText : Time -> Dated String -> Html Msg
-fadingText now dated =
+fadingText now (Dated time str) =
     let
         age =
-            now - dated.time
+            now - time
 
         fadingDelay =
-            3 * second
+            8 * second
 
         opacity =
             -- linear progression
             1 - (progress 0 fadingDelay age)
     in
-        span [ styleOpacity opacity ] [ text dated.value ]
+        span [ styleOpacity opacity ] [ text str ]
 
 
 
