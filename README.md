@@ -1,8 +1,8 @@
 # Water Writing
 
-See video below
+Writing does not have to be persistent. Watch the video below...
 
-[![Youtube Video](https://img.youtube.com/vi/SXCXHed3GC8/0.jpg)](https://www.youtube.com/watch?v=SXCXHed3GC8&feature=youtu.be&t=40m37)
+[![Youtube Video](video-preview.png)](https://www.youtube.com/watch?v=SXCXHed3GC8&feature=youtu.be&t=40m38s)
 
 ## Running
 To run locally, install Elm and:
