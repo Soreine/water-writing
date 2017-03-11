@@ -26,10 +26,11 @@ main =
 -- TYPES
 
 
-{-| Dated values
+{-| Characters, or line breaks. All the things that make up the text written by the user, that needs to be displayed in its space.
 -}
-type Dated a
-    = Dated Time a
+type Stroke
+    = Dated Time String
+    | LineBreak
 
 
 
@@ -37,16 +38,21 @@ type Dated a
 
 
 type alias Model =
-    { currentLine : String
-    , lines : List (Dated String)
+    { strokes : List (Stroke)
+    , {-
+         The character being written in the hidden input. We need to keep it there
+         until the next character is typed, to support dead keys
+         https://en.wikipedia.org/wiki/Dead_key
+      -}
+      inputText : String
     , now : Time
     }
 
 
 model : Model
 model =
-    { currentLine = ""
-    , lines = []
+    { strokes = []
+    , inputText = ""
     , now = 0
     }
 
@@ -72,16 +78,18 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TypeText text ->
-            ( { model | currentLine = text }
+            ( newInput model text
             , Cmd.none
             )
 
         BreakLine ->
-            -- Move current text to previous lines
-            ( { model
-                | currentLine = ""
-                , lines = model.lines ++ [ Dated model.now model.currentLine ]
-              }
+            ( let
+                model2 =
+                    (finishStroke model)
+              in
+                { model2
+                    | strokes = model.strokes ++ [ LineBreak ]
+                }
             , Cmd.none
             )
 
@@ -95,6 +103,61 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
+
+
+{-| Input received new text value.
+-}
+newInput : Model -> String -> Model
+newInput model newText =
+    let
+        oldText =
+            model.inputText
+
+        oldLength =
+            String.length oldText
+
+        newLength =
+            String.length newText
+    in
+        if (newLength == 0) then
+            model
+            -- Do not alter the current state. This has the effect to disallow erasing the input completely
+        else if (newLength == 1 && oldLength == 1) then
+            -- Allow dead keys to modify current char
+            { model | inputText = newText }
+        else if (not <| String.startsWith oldText newText) then
+            model
+            -- Disallow erasing or modifying the input
+        else
+            let
+                lastChar =
+                    newText |> String.reverse |> String.left 1
+
+                rest =
+                    String.slice 0 -1 newText
+
+                restStrokes =
+                    Dated model.now rest
+            in
+                { model
+                    | inputText = lastChar
+                    , strokes = model.strokes ++ [ restStrokes ]
+                }
+
+
+{-| Clear and convert current input, if any, to strokes
+-}
+finishStroke : Model -> Model
+finishStroke model =
+    case model.inputText of
+        "" ->
+            model
+
+        str ->
+            { model
+                | inputText = ""
+                , strokes = model.strokes ++ [ Dated model.now str ]
+            }
 
 
 focusInput : Cmd Msg
@@ -133,18 +196,19 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
+        allStrokes =
+            (model.strokes ++ [ Dated model.now model.inputText ])
+
         written : List (Html Msg)
         written =
-            (model.lines ++ [ Dated model.now model.currentLine ])
-                |> List.map (fadingText model.now)
-                |> List.intersperse (br [] [])
+            allStrokes |> List.map (renderStroke model.now)
     in
         div [ id "wall" ]
             [ span [ class "writing" ]
                 (written
                     ++ [ cursor ]
                 )
-            , hiddenInput model.currentLine
+            , hiddenInput model.inputText
             ]
 
 
@@ -172,20 +236,25 @@ hiddenInput val =
         []
 
 
-fadingText : Time -> Dated String -> Html Msg
-fadingText now (Dated time str) =
-    let
-        age =
-            now - time
+renderStroke : Time -> Stroke -> Html Msg
+renderStroke now stroke =
+    case stroke of
+        LineBreak ->
+            br [] []
 
-        fadingDelay =
-            8 * second
+        Dated time str ->
+            let
+                age =
+                    now - time
 
-        opacity =
-            -- linear progression
-            1 - (progress 0 fadingDelay age)
-    in
-        span [ styleOpacity opacity ] [ text str ]
+                fadingDelay =
+                    8 * second
+
+                opacity =
+                    -- linear progression
+                    1 - (progress 0 fadingDelay age)
+            in
+                span [ styleOpacity opacity ] [ text str ]
 
 
 
