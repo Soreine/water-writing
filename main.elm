@@ -8,6 +8,8 @@ import Html.Events exposing (on, onInput, onBlur, defaultOptions)
 import Json.Decode as Decode
 import Task
 import Time exposing (Time, second)
+import Debug
+import Result exposing (Result)
 
 
 main : Program Never Model Msg
@@ -98,7 +100,21 @@ update msg model =
 focusInput : Cmd Msg
 focusInput =
     Dom.focus "hidden-input"
-        |> Task.attempt (always NoOp)
+        |> Task.attempt (logError >> always NoOp)
+
+
+logError : Result a b -> Result a b
+logError result =
+    case result of
+        Err error ->
+            let
+                _ =
+                    Debug.log (toString error)
+            in
+                result
+
+        Ok _ ->
+            result
 
 
 
