@@ -2,10 +2,9 @@ module Main exposing (..)
 
 import AnimationFrame
 import Dom
-import Html exposing (Html, Attribute, div, span, input, text, br)
+import Html exposing (Html, Attribute, div, span, textarea, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
-import Json.Decode as Decode
 import Task
 import Time exposing (Time, second)
 import Debug
@@ -26,11 +25,10 @@ main =
 -- TYPES
 
 
-{-| Characters, or line breaks. All the things that make up the text written by the user, that needs to be displayed in its space.
+{-| A stroke is a character and a timestamp, because it will displayed and will fades with time.
 -}
 type Stroke
     = Dated Time String
-    | LineBreak
 
 
 
@@ -39,12 +37,6 @@ type Stroke
 
 type alias Model =
     { strokes : List (Stroke)
-    , {-
-         The character being written in the hidden input. We need to keep it there
-         until the next character is typed, to support dead keys
-         https://en.wikipedia.org/wiki/Dead_key
-      -}
-      inputText : String
     , now : Time
     }
 
@@ -52,7 +44,6 @@ type alias Model =
 model : Model
 model =
     { strokes = []
-    , inputText = ""
     , now = 0
     }
 
@@ -68,7 +59,6 @@ init =
 
 type Msg
     = TypeText String
-    | BreakLine
     | InputBlurred
     | Tick Time
     | NoOp
@@ -79,17 +69,6 @@ update msg model =
     case msg of
         TypeText text ->
             ( newInput model text
-            , Cmd.none
-            )
-
-        BreakLine ->
-            ( let
-                model2 =
-                    (finishStroke model)
-              in
-                { model2
-                    | strokes = model.strokes ++ [ LineBreak ]
-                }
             , Cmd.none
             )
 
@@ -105,59 +84,39 @@ update msg model =
             ( model, Cmd.none )
 
 
-{-| Input received new text value.
+{-| Input received new text value. Update the strokes.
 -}
 newInput : Model -> String -> Model
 newInput model newText =
     let
-        oldText =
-            model.inputText
+        newChars =
+            toStringList newText
 
-        oldLength =
-            String.length oldText
+        sizeDiff =
+            (List.length newChars - List.length model.strokes)
 
-        newLength =
-            String.length newText
+        -- When using `map2`, the longest list is cropped. We don't want to crop new inputs.
+        paddedStrokes =
+            model.strokes ++ List.repeat sizeDiff (Dated model.now "")
+
+        updatedStrokes =
+            List.map2 (updateStroke model.now) paddedStrokes newChars
     in
-        if (newLength == 0) then
-            model
-            -- Do not alter the current state. This has the effect to disallow erasing the input completely
-        else if (newLength == 1 && oldLength == 1) then
-            -- Allow dead keys to modify current char
-            { model | inputText = newText }
-        else if (not <| String.startsWith oldText newText) then
-            model
-            -- Disallow erasing or modifying the input
-        else
-            let
-                lastChar =
-                    newText |> String.reverse |> String.left 1
-
-                rest =
-                    String.slice 0 -1 newText
-
-                restStrokes =
-                    Dated model.now rest
-            in
-                { model
-                    | inputText = lastChar
-                    , strokes = model.strokes ++ [ restStrokes ]
-                }
+        { model | strokes = updatedStrokes }
 
 
-{-| Clear and convert current input, if any, to strokes
+{-| Update a stroke with a new character. Updates its time too.
 -}
-finishStroke : Model -> Model
-finishStroke model =
-    case model.inputText of
-        "" ->
-            model
-
-        str ->
-            { model
-                | inputText = ""
-                , strokes = model.strokes ++ [ Dated model.now str ]
-            }
+updateStroke : Time -> Stroke -> String -> Stroke
+updateStroke now stroke string =
+    let
+        (Dated time str) =
+            stroke
+    in
+        if (str == string) then
+            stroke
+        else
+            Dated now string
 
 
 focusInput : Cmd Msg
@@ -194,21 +153,22 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view model =
+view { now, strokes } =
     let
-        allStrokes =
-            (model.strokes ++ [ Dated model.now model.inputText ])
-
         written : List (Html Msg)
         written =
-            allStrokes |> List.map (renderStroke model.now)
+            strokes |> List.map (renderStroke now)
+
+        strokesToText : String
+        strokesToText =
+            strokes |> List.map (\(Dated _ str) -> str) |> String.join ""
     in
         div [ id "wall" ]
             [ span [ class "writing" ]
                 (written
                     ++ [ cursor ]
                 )
-            , hiddenInput model.inputText
+            , hiddenInput strokesToText
             ]
 
 
@@ -225,36 +185,33 @@ cursor =
 -}
 hiddenInput : String -> Html Msg
 hiddenInput val =
-    input
+    textarea
         [ id "hidden-input"
         , autofocus True
         , value val
         , onInput TypeText
-        , onEnter BreakLine
         , onBlur InputBlurred
         ]
         []
 
 
 renderStroke : Time -> Stroke -> Html Msg
-renderStroke now stroke =
-    case stroke of
-        LineBreak ->
+renderStroke now (Dated time str) =
+    let
+        age =
+            now - time
+
+        fadingDelay =
+            8 * second
+
+        opacity =
+            -- linear progression
+            1 - (progress 0 fadingDelay age)
+    in
+        if (str == "\n") then
             br [] []
-
-        Dated time str ->
-            let
-                age =
-                    now - time
-
-                fadingDelay =
-                    8 * second
-
-                opacity =
-                    -- linear progression
-                    1 - (progress 0 fadingDelay age)
-            in
-                span [ styleOpacity opacity ] [ text str ]
+        else
+            span [ styleOpacity opacity ] [ text str ]
 
 
 
@@ -277,25 +234,9 @@ styleOpacity opacity =
     style [ ( "opacity", toString opacity ) ]
 
 
-{-| Detect Enter input, and prevent default behavior.
-
-http://stackoverflow.com/questions/42390708/elm-conditional-preventdefault-with-contenteditable
+{-|
+Convert a String to a List of individual characters String
 -}
-onEnter : msg -> Attribute msg
-onEnter msg =
-    let
-        options =
-            { defaultOptions | preventDefault = True }
-
-        filterKey code =
-            -- Enter
-            if code == 13 then
-                Decode.succeed msg
-            else
-                Decode.fail "ignored input"
-
-        decoder =
-            Html.Events.keyCode
-                |> Decode.andThen filterKey
-    in
-        Html.Events.onWithOptions "keydown" options decoder
+toStringList : String -> List String
+toStringList str =
+    String.toList str |> List.map String.fromChar
