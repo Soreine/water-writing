@@ -13,6 +13,10 @@
     width: 40%;
 
     font-size: 3rem;
+
+    /* Disable selection and 'text' cursor */
+    user-select: none;
+    cursor: default;
 }
 
 .cursor {
