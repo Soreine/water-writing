@@ -5,10 +5,12 @@ import Dom
 import Html exposing (Html, Attribute, div, span, textarea, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
+import Json.Decode as Decode
 import Task
 import Time exposing (Time, second)
 import Debug
 import Result exposing (Result)
+import Constants
 
 
 main : Program Never Model Msg
@@ -19,6 +21,15 @@ main =
         , view = view
         , subscriptions = subscriptions
         }
+
+
+
+-- CONSTANTS
+
+
+fadingDelay : Float
+fadingDelay =
+    8 * second
 
 
 
@@ -190,6 +201,12 @@ hiddenInput val =
         , autofocus True
         , value val
         , onInput TypeText
+        , onKeys
+            [ Constants.uparrow
+            , Constants.leftarrow
+            , Constants.tab
+            ]
+            (always NoOp)
         , onBlur InputBlurred
         ]
         []
@@ -200,9 +217,6 @@ renderStroke now (Dated time str) =
     let
         age =
             now - time
-
-        fadingDelay =
-            8 * second
 
         opacity =
             -- linear progression
@@ -240,3 +254,27 @@ Convert a String to a List of individual characters String
 toStringList : String -> List String
 toStringList str =
     String.toList str |> List.map String.fromChar
+
+
+{-| Detect keys input, and prevent default behavior.
+
+Based on http://stackoverflow.com/questions/42390708/elm-conditional-preventdefault-with-contenteditable
+-}
+onKeys : List Int -> (Int -> msg) -> Attribute msg
+onKeys keyCodes onKey =
+    let
+        options =
+            { defaultOptions | preventDefault = True }
+
+        filterKey code =
+            -- Enter
+            if List.member code keyCodes then
+                Decode.succeed (onKey code)
+            else
+                Decode.fail "ignored input"
+
+        decoder =
+            Html.Events.keyCode
+                |> Decode.andThen filterKey
+    in
+        Html.Events.onWithOptions "keydown" options decoder
