@@ -11,6 +11,7 @@ import Time exposing (Time, second)
 import Debug
 import Result exposing (Result)
 import Constants
+import List.Extra
 
 
 main : Program Never Model Msg
@@ -79,7 +80,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TypeText text ->
-            ( newInput model text
+            ( model |> (newInput text) |> cleanupStrokes
             , Cmd.none
             )
 
@@ -97,8 +98,8 @@ update msg model =
 
 {-| Input received new text value. Update the strokes.
 -}
-newInput : Model -> String -> Model
-newInput model newText =
+newInput : String -> Model -> Model
+newInput newText model =
     let
         newChars =
             toStringList newText
@@ -128,6 +129,24 @@ updateStroke now stroke string =
             stroke
         else
             Dated now string
+
+
+{-| Remove all lines of strokes that have completely disappeared.
+-}
+cleanupStrokes : Model -> Model
+cleanupStrokes model =
+    let
+        isOldLineBreak (Dated time txt) =
+            (txt == "\n") && (model.now - time > fadingDelay)
+
+        cleaned =
+            -- Assuming strokes are in a chronological sequence.
+            model.strokes
+                |> List.reverse
+                |> List.Extra.takeWhile (not << isOldLineBreak)
+                |> List.reverse
+    in
+        { model | strokes = cleaned }
 
 
 focusInput : Cmd Msg
