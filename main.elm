@@ -237,14 +237,25 @@ renderStroke now (Dated time str) =
         age =
             now - time
 
+        prog =
+            progress 0 fadingDelay age
+
         opacity =
-            -- linear progression
-            1 - (progress 0 fadingDelay age)
+            -- ease-in progression
+            1 - (prog * prog)
+
+        blur =
+            -- ease-in progression, in px
+            (prog * prog) * 3
     in
         if (str == "\n") then
             br [] []
         else
-            span [ styleOpacity opacity ] [ text str ]
+            span
+                [ styleOpacity opacity
+                , styleBlur blur
+                ]
+                [ text str ]
 
 
 
@@ -265,6 +276,11 @@ progress min max x =
 styleOpacity : number -> Attribute msg
 styleOpacity opacity =
     style [ ( "opacity", toString opacity ) ]
+
+
+styleBlur : number -> Attribute msg
+styleBlur blur =
+    style [ ( "filter", "blur(" ++ toString blur ++ "px)" ) ]
 
 
 {-|
