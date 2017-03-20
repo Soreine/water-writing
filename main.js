@@ -10383,6 +10383,24 @@ var _Soreine$water_writing$Main$toStringList = function (str) {
 		_elm_lang$core$String$fromChar,
 		_elm_lang$core$String$toList(str));
 };
+var _Soreine$water_writing$Main$styleBlur = function (blur) {
+	return _elm_lang$html$Html_Attributes$style(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'filter',
+				_1: A2(
+					_elm_lang$core$Basics_ops['++'],
+					'blur(',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						_elm_lang$core$Basics$toString(blur),
+						'px)'))
+			},
+			_1: {ctor: '[]'}
+		});
+};
 var _Soreine$water_writing$Main$styleOpacity = function (opacity) {
 	return _elm_lang$html$Html_Attributes$style(
 		{
@@ -10445,7 +10463,9 @@ var _Soreine$water_writing$Main$renderStroke = F2(
 		var _p6 = _p5;
 		var _p7 = _p6._1;
 		var age = now - _p6._0;
-		var opacity = 1 - A3(_Soreine$water_writing$Main$progress, 0, _Soreine$water_writing$Main$fadingDelay, age);
+		var prog = A3(_Soreine$water_writing$Main$progress, 0, _Soreine$water_writing$Main$fadingDelay, age);
+		var opacity = 1 - (prog * prog);
+		var blur = (prog * prog) * 3;
 		return _elm_lang$core$Native_Utils.eq(_p7, '\n') ? A2(
 			_elm_lang$html$Html$br,
 			{ctor: '[]'},
@@ -10454,7 +10474,11 @@ var _Soreine$water_writing$Main$renderStroke = F2(
 			{
 				ctor: '::',
 				_0: _Soreine$water_writing$Main$styleOpacity(opacity),
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: _Soreine$water_writing$Main$styleBlur(blur),
+					_1: {ctor: '[]'}
+				}
 			},
 			{
 				ctor: '::',
