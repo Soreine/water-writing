@@ -50,19 +50,18 @@ type Stroke
 type alias Model =
     { strokes : List (Stroke)
     , now : Time
-    }
-
-
-model : Model
-model =
-    { strokes = []
-    , now = 0
+    , startedTyping : Maybe (Time)
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, Cmd.none )
+    ( { strokes = []
+      , now = 0
+      , startedTyping = Nothing
+      }
+    , Cmd.none
+    )
 
 
 
@@ -80,7 +79,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TypeText text ->
-            ( model |> (newInput text) |> cleanupStrokes
+            ( model |> (newInput text) |> cleanupStrokes |> startTyping
             , Cmd.none
             )
 
@@ -94,6 +93,13 @@ update msg model =
 
         NoOp ->
             ( model, Cmd.none )
+
+
+{-| Record the time when the user started typing
+-}
+startTyping : Model -> Model
+startTyping model =
+    { model | startedTyping = initMaybe model.startedTyping model.now }
 
 
 {-| Input received new text value. Update the strokes.
@@ -158,7 +164,10 @@ focusInput =
 logError : Result a b -> Result a b
 
 
+
 -- SUBSCRIPTIONS
+
+
 logError =
     Result.mapError (\err -> Debug.log (toString err) err)
 
@@ -173,7 +182,7 @@ subscriptions model =
 
 
 view : Model -> Html Msg
-view { now, strokes } =
+view { now, strokes, startedTyping } =
     let
         written : List (Html Msg)
         written =
@@ -186,7 +195,7 @@ view { now, strokes } =
         div [ id "wall" ]
             [ span [ class "writing" ]
                 (written
-                    ++ [ cursor ]
+                    ++ [ cursor startedTyping ]
                 )
             , hiddenInput strokesToText
             ]
@@ -196,9 +205,14 @@ view { now, strokes } =
 -- ELEMENTS
 
 
-cursor : Html Msg
-cursor =
-    span [ class "cursor" ] []
+cursor : Maybe (Time) -> Html Msg
+cursor startedTyping =
+    case startedTyping of
+        Just v ->
+            span [ class "cursor" ] []
+
+        Nothing ->
+            span [ class "cursor start-visible" ] []
 
 
 {-| Invisibile input used to capture text input. Always focused
@@ -303,3 +317,13 @@ onKeys keyCodes onKey =
                 |> Decode.andThen filterKey
     in
         Html.Events.onWithOptions "keydown" options decoder
+
+
+initMaybe : Maybe a -> a -> Maybe a
+initMaybe maybe value =
+    case maybe of
+        Just _ ->
+            maybe
+
+        Nothing ->
+            Just value
