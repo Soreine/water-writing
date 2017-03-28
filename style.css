@@ -31,8 +31,6 @@
 
 .cursor {
     opacity: 1;
-    -webkit-animation: blink 1.3s infinite;
-    -moz-animation: blink 1.3s infinite;
     animation: blink 1.3s infinite;
     animation-timing-function: initial;
 }

@@ -236,7 +236,7 @@ renderStroke now (Dated time str) =
 
         blur =
             -- ease-in progression, in px
-            (prog * prog) * 3
+            (prog * prog) * 5
     in
         if (str == "\n") then
             br [] []
