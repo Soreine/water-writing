@@ -10365,6 +10365,15 @@ var _elm_community$list_extra$List_Extra$init = function () {
 var _elm_community$list_extra$List_Extra$last = _elm_community$list_extra$List_Extra$foldl1(
 	_elm_lang$core$Basics$flip(_elm_lang$core$Basics$always));
 
+var _Soreine$water_writing$Main$initMaybe = F2(
+	function (maybe, value) {
+		var _p0 = maybe;
+		if (_p0.ctor === 'Just') {
+			return maybe;
+		} else {
+			return _elm_lang$core$Maybe$Just(value);
+		}
+	});
 var _Soreine$water_writing$Main$onKeys = F2(
 	function (keyCodes, onKey) {
 		var filterKey = function (code) {
@@ -10418,29 +10427,51 @@ var _Soreine$water_writing$Main$progress = F3(
 		var normX = A3(_elm_lang$core$Basics$clamp, min, max, x);
 		return (normX - min) / (max - min);
 	});
-var _Soreine$water_writing$Main$cursor = A2(
-	_elm_lang$html$Html$span,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$class('cursor'),
-		_1: {ctor: '[]'}
-	},
-	{ctor: '[]'});
-var _Soreine$water_writing$Main$logError = function (result) {
-	var _p0 = result;
-	if (_p0.ctor === 'Err') {
-		var _p1 = _elm_lang$core$Debug$log(
-			_elm_lang$core$Basics$toString(_p0._0));
-		return result;
+var _Soreine$water_writing$Main$cursor = function (startedTyping) {
+	var _p1 = startedTyping;
+	if (_p1.ctor === 'Just') {
+		return A2(
+			_elm_lang$html$Html$span,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('cursor'),
+				_1: {ctor: '[]'}
+			},
+			{ctor: '[]'});
 	} else {
-		return result;
+		return A2(
+			_elm_lang$html$Html$span,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('cursor start-visible'),
+				_1: {ctor: '[]'}
+			},
+			{ctor: '[]'});
 	}
 };
-var _Soreine$water_writing$Main$model = {
-	strokes: {ctor: '[]'},
-	now: 0
+var _Soreine$water_writing$Main$logError = _elm_lang$core$Result$mapError(
+	function (err) {
+		return A2(
+			_elm_lang$core$Debug$log,
+			_elm_lang$core$Basics$toString(err),
+			err);
+	});
+var _Soreine$water_writing$Main$startTyping = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			startedTyping: A2(_Soreine$water_writing$Main$initMaybe, model.startedTyping, model.now)
+		});
 };
-var _Soreine$water_writing$Main$init = {ctor: '_Tuple2', _0: _Soreine$water_writing$Main$model, _1: _elm_lang$core$Platform_Cmd$none};
+var _Soreine$water_writing$Main$init = {
+	ctor: '_Tuple2',
+	_0: {
+		strokes: {ctor: '[]'},
+		now: 0,
+		startedTyping: _elm_lang$core$Maybe$Nothing
+	},
+	_1: _elm_lang$core$Platform_Cmd$none
+};
 var _Soreine$water_writing$Main$fadingDelay = 8 * _elm_lang$core$Time$second;
 var _Soreine$water_writing$Main$cleanupStrokes = function (model) {
 	var isOldLineBreak = function (_p2) {
@@ -10465,7 +10496,7 @@ var _Soreine$water_writing$Main$renderStroke = F2(
 		var age = now - _p6._0;
 		var prog = A3(_Soreine$water_writing$Main$progress, 0, _Soreine$water_writing$Main$fadingDelay, age);
 		var opacity = 1 - (prog * prog);
-		var blur = (prog * prog) * 3;
+		var blur = (prog * prog) * 5;
 		return _elm_lang$core$Native_Utils.eq(_p7, '\n') ? A2(
 			_elm_lang$html$Html$br,
 			{ctor: '[]'},
@@ -10486,9 +10517,9 @@ var _Soreine$water_writing$Main$renderStroke = F2(
 				_1: {ctor: '[]'}
 			});
 	});
-var _Soreine$water_writing$Main$Model = F2(
-	function (a, b) {
-		return {strokes: a, now: b};
+var _Soreine$water_writing$Main$Model = F3(
+	function (a, b, c) {
+		return {strokes: a, now: b, startedTyping: c};
 	});
 var _Soreine$water_writing$Main$Dated = F2(
 	function (a, b) {
@@ -10538,8 +10569,9 @@ var _Soreine$water_writing$Main$update = F2(
 			case 'TypeText':
 				return {
 					ctor: '_Tuple2',
-					_0: _Soreine$water_writing$Main$cleanupStrokes(
-						A2(_Soreine$water_writing$Main$newInput, _p10._0, model)),
+					_0: _Soreine$water_writing$Main$startTyping(
+						_Soreine$water_writing$Main$cleanupStrokes(
+							A2(_Soreine$water_writing$Main$newInput, _p10._0, model))),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'InputBlurred':
@@ -10649,7 +10681,7 @@ var _Soreine$water_writing$Main$view = function (_p11) {
 					written,
 					{
 						ctor: '::',
-						_0: _Soreine$water_writing$Main$cursor,
+						_0: _Soreine$water_writing$Main$cursor(_p12.startedTyping),
 						_1: {ctor: '[]'}
 					})),
 			_1: {
