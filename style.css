@@ -8,7 +8,15 @@
 
 .writing {
     position: absolute;
+    bottom: 30%;
+    left: 30%;
+    width: 40%;
+
     font-size: 3rem;
+
+    /* Disable selection and 'text' cursor */
+    user-select: none;
+    cursor: default;
 }
 
 .cursor {
@@ -22,27 +30,24 @@
 /* Blinking */
 
 .cursor {
-    opacity: 1;
-    -webkit-animation: blink 1.3s infinite;
-    -moz-animation: blink 1.3s infinite;
-    animation: blink 1.3s infinite;
+    opacity: 0;
+    animation-name: blink;
+    animation-duration: 1.1s;
+    /* Appear some time after the user stopped typing.*/
+    /* It appears after all letters have disappeared */
+    animation-delay: 9s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
     animation-timing-function: initial;
 }
 
 @keyframes blink {
-    0% { opacity:1; }
-    50% { opacity:0; }
+    0% { opacity:0; }
     100% { opacity:1; }
 }
-@-webkit-keyframes blink{
-    0% { opacity:1; }
-    50% { opacity:0; }
-    100% { opacity:1; }
-}
-@-moz-keyframes blink {
-    0% { opacity:1; }
-    50% { opacity:0; }
-    100% { opacity:1; }
+
+.start-visible {
+    animation-delay: 1s; /* Only wait one second before the first inputs */
 }
 
 #hidden-input {

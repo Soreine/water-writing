@@ -1,11 +1,17 @@
 module Main exposing (..)
 
-import Html exposing (Html, Attribute, div, span, input, text, br)
+import AnimationFrame
+import Dom
+import Html exposing (Html, Attribute, div, span, textarea, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
 import Json.Decode as Decode
-import Dom
 import Task
+import Time exposing (Time, second)
+import Debug
+import Result exposing (Result)
+import Constants
+import List.Extra
 
 
 main : Program Never Model Msg
@@ -14,8 +20,27 @@ main =
         { init = init
         , update = update
         , view = view
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
+
+
+
+-- CONSTANTS
+
+
+fadingDelay : Float
+fadingDelay =
+    8 * second
+
+
+
+-- TYPES
+
+
+{-| A stroke is a character and a timestamp, because it will displayed and will fades with time.
+-}
+type Stroke
+    = Dated Time String
 
 
 
@@ -23,31 +48,20 @@ main =
 
 
 type alias Model =
-    { location : Coord
-    , currentLine : String
-    , lines : List String
-    }
-
-
-model : Model
-model =
-    { location = ( 0, 0 )
-    , currentLine = ""
-    , lines = []
+    { strokes : List (Stroke)
+    , now : Time
+    , startedTyping : Maybe (Time)
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( model, Cmd.none )
-
-
-
--- Integer coordinates
-
-
-type alias Coord =
-    ( Int, Int )
+    ( { strokes = []
+      , now = 0
+      , startedTyping = Nothing
+      }
+    , Cmd.none
+    )
 
 
 
@@ -55,46 +69,112 @@ type alias Coord =
 
 
 type Msg
-    = ClickAt Coord
-    | TypeText String
-    | BreakLine
+    = TypeText String
     | InputBlurred
+    | Tick Time
     | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ClickAt ( x, y ) ->
-            ( { model | location = ( x, y ) }
-            , focusInput
-            )
-
         TypeText text ->
-            ( { model | currentLine = text }
-            , Cmd.none
-            )
-
-        BreakLine ->
-            -- Move current text to previous lines
-            ( { model
-                | currentLine = ""
-                , lines = model.lines ++ [ model.currentLine ]
-              }
+            ( model |> (newInput text) |> cleanupStrokes |> startTyping
             , Cmd.none
             )
 
         InputBlurred ->
             ( model, focusInput )
 
+        Tick newTime ->
+            ( { model | now = newTime }
+            , Cmd.none
+            )
+
         NoOp ->
             ( model, Cmd.none )
+
+
+{-| Record the time when the user started typing
+-}
+startTyping : Model -> Model
+startTyping model =
+    { model | startedTyping = initMaybe model.startedTyping model.now }
+
+
+{-| Input received new text value. Update the strokes.
+-}
+newInput : String -> Model -> Model
+newInput newText model =
+    let
+        newChars =
+            toStringList newText
+
+        sizeDiff =
+            (List.length newChars - List.length model.strokes)
+
+        -- When using `map2`, the longest list is cropped. We don't want to crop new inputs.
+        paddedStrokes =
+            model.strokes ++ List.repeat sizeDiff (Dated model.now "")
+
+        updatedStrokes =
+            List.map2 (updateStroke model.now) paddedStrokes newChars
+    in
+        { model | strokes = updatedStrokes }
+
+
+{-| Update a stroke with a new character. Updates its time too.
+-}
+updateStroke : Time -> Stroke -> String -> Stroke
+updateStroke now stroke string =
+    let
+        (Dated time str) =
+            stroke
+    in
+        if (str == string) then
+            stroke
+        else
+            Dated now string
+
+
+{-| Remove all lines of strokes that have completely disappeared.
+-}
+cleanupStrokes : Model -> Model
+cleanupStrokes model =
+    let
+        isOldLineBreak (Dated time txt) =
+            (txt == "\n") && (model.now - time > fadingDelay)
+
+        cleaned =
+            -- Assuming strokes are in a chronological sequence.
+            model.strokes
+                |> List.reverse
+                |> List.Extra.takeWhile (not << isOldLineBreak)
+                |> List.reverse
+    in
+        { model | strokes = cleaned }
 
 
 focusInput : Cmd Msg
 focusInput =
     Dom.focus "hidden-input"
-        |> Task.attempt (always NoOp)
+        |> Task.attempt (logError >> always NoOp)
+
+
+logError : Result a b -> Result a b
+
+
+
+-- SUBSCRIPTIONS
+
+
+logError =
+    Result.mapError (\err -> Debug.log (toString err) err)
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    AnimationFrame.times Tick
 
 
 
@@ -102,23 +182,22 @@ focusInput =
 
 
 view : Model -> Html Msg
-view model =
+view { now, strokes, startedTyping } =
     let
         written : List (Html Msg)
         written =
-            (model.lines ++ [ model.currentLine ])
-                |> List.map text
-                |> List.intersperse (br [] [])
+            strokes |> List.map (renderStroke now)
+
+        strokesToText : String
+        strokesToText =
+            strokes |> List.map (\(Dated _ str) -> str) |> String.join ""
     in
-        div
-            [ id "wall"
-            , on "click" (Decode.map ClickAt decodeClickLocation)
-            ]
-            [ span [ class "writing", stylePosition model.location ]
+        div [ id "wall" ]
+            [ span [ class "writing" ]
                 (written
-                    ++ [ cursor ]
+                    ++ [ cursor startedTyping ]
                 )
-            , hiddenInput model.currentLine
+            , hiddenInput strokesToText
             ]
 
 
@@ -126,67 +205,110 @@ view model =
 -- ELEMENTS
 
 
-cursor : Html Msg
-cursor =
-    span [ class "cursor" ] []
+cursor : Maybe (Time) -> Html Msg
+cursor startedTyping =
+    case startedTyping of
+        Just v ->
+            span [ class "cursor" ] []
+
+        Nothing ->
+            span [ class "cursor start-visible" ] []
 
 
 {-| Invisibile input used to capture text input. Always focused
 -}
 hiddenInput : String -> Html Msg
 hiddenInput val =
-    input
+    textarea
         [ id "hidden-input"
         , autofocus True
         , value val
         , onInput TypeText
-        , onEnter BreakLine
+        , onKeys
+            [ Constants.uparrow
+            , Constants.leftarrow
+            , Constants.tab
+            ]
+            (always NoOp)
         , onBlur InputBlurred
         ]
         []
+
+
+renderStroke : Time -> Stroke -> Html Msg
+renderStroke now (Dated time str) =
+    let
+        age =
+            now - time
+
+        prog =
+            progress 0 fadingDelay age
+
+        opacity =
+            -- ease-in progression
+            1 - (prog * prog)
+
+        blur =
+            -- ease-in progression, in px
+            (prog * prog) * 5
+    in
+        if (str == "\n") then
+            br [] []
+        else
+            span
+                [ styleOpacity opacity
+                , styleBlur blur
+                ]
+                [ text str ]
 
 
 
 -- UTILS
 
 
-{-| Style to position left and top to the given coords.
+{-| Returns the progress (within [0, 1]) of a value, relative to a min and max. (Matthieu, better naming for this value?).
 -}
-stylePosition : Coord -> Attribute msg
-stylePosition ( x, y ) =
-    style
-        [ ( "left", (toString x) ++ "px" )
-        , ( "top", (toString y) ++ "px" )
-        ]
+progress : Float -> Float -> Float -> Float
+progress min max x =
+    let
+        normX =
+            clamp min max x
+    in
+        (normX - min) / (max - min)
 
 
-decodeClickLocation : Decode.Decoder Coord
-decodeClickLocation =
-    Decode.map2 (,)
-        (Decode.map2 (-)
-            (Decode.at [ "pageX" ] Decode.int)
-            (Decode.at [ "currentTarget", "offsetLeft" ] Decode.int)
-        )
-        (Decode.map2 (-)
-            (Decode.at [ "pageY" ] Decode.int)
-            (Decode.at [ "currentTarget", "offsetTop" ] Decode.int)
-        )
+styleOpacity : number -> Attribute msg
+styleOpacity opacity =
+    style [ ( "opacity", toString opacity ) ]
 
 
-{-| Detect Enter input, and prevent default behavior.
+styleBlur : number -> Attribute msg
+styleBlur blur =
+    style [ ( "filter", "blur(" ++ toString blur ++ "px)" ) ]
 
-http://stackoverflow.com/questions/42390708/elm-conditional-preventdefault-with-contenteditable
+
+{-|
+Convert a String to a List of individual characters String
 -}
-onEnter : msg -> Attribute msg
-onEnter msg =
+toStringList : String -> List String
+toStringList str =
+    String.toList str |> List.map String.fromChar
+
+
+{-| Detect keys input, and prevent default behavior.
+
+Based on http://stackoverflow.com/questions/42390708/elm-conditional-preventdefault-with-contenteditable
+-}
+onKeys : List Int -> (Int -> msg) -> Attribute msg
+onKeys keyCodes onKey =
     let
         options =
             { defaultOptions | preventDefault = True }
 
         filterKey code =
             -- Enter
-            if code == 13 then
-                Decode.succeed msg
+            if List.member code keyCodes then
+                Decode.succeed (onKey code)
             else
                 Decode.fail "ignored input"
 
@@ -195,3 +317,13 @@ onEnter msg =
                 |> Decode.andThen filterKey
     in
         Html.Events.onWithOptions "keydown" options decoder
+
+
+initMaybe : Maybe a -> a -> Maybe a
+initMaybe maybe value =
+    case maybe of
+        Just _ ->
+            maybe
+
+        Nothing ->
+            Just value
