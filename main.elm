@@ -156,21 +156,11 @@ focusInput =
 
 
 logError : Result a b -> Result a b
-logError result =
-    case result of
-        Err error ->
-            let
-                _ =
-                    Debug.log (toString error)
-            in
-                result
-
-        Ok _ ->
-            result
-
 
 
 -- SUBSCRIPTIONS
+logError =
+    Result.mapError (\err -> Debug.log (toString err) err)
 
 
 subscriptions : Model -> Sub Msg
