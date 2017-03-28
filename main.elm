@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import AnimationFrame
 import Dom
+import Ease
 import Html exposing (Html, Attribute, div, span, textarea, text, br)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onInput, onBlur, defaultOptions)
@@ -246,11 +247,11 @@ renderStroke now (Dated time str) =
 
         opacity =
             -- ease-in progression
-            1 - (prog * prog)
+            1 - (Ease.inQuad prog)
 
         blur =
             -- ease-in progression, in px
-            (prog * prog) * 5
+            (Ease.inQuad prog) * 5
     in
         if (str == "\n") then
             br [] []
