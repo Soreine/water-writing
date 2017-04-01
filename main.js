@@ -4860,6 +4860,145 @@ var _elm_lang$dom$Dom$NotFound = function (a) {
 	return {ctor: 'NotFound', _0: a};
 };
 
+var _elm_community$easing_functions$Ease$reverse = F2(
+	function (easing, time) {
+		return easing(1 - time);
+	});
+var _elm_community$easing_functions$Ease$flip = F2(
+	function (easing, time) {
+		return 1 - easing(1 - time);
+	});
+var _elm_community$easing_functions$Ease$retour = F2(
+	function (easing, time) {
+		return (_elm_lang$core$Native_Utils.cmp(time, 0.5) < 0) ? easing(time * 2) : A2(_elm_community$easing_functions$Ease$flip, easing, (time - 0.5) * 2);
+	});
+var _elm_community$easing_functions$Ease$inOut = F3(
+	function (e1, e2, time) {
+		return (_elm_lang$core$Native_Utils.cmp(time, 0.5) < 0) ? (e1(time * 2) / 2) : (0.5 + (e2((time - 0.5) * 2) / 2));
+	});
+var _elm_community$easing_functions$Ease$inElastic = function (time) {
+	if (_elm_lang$core$Native_Utils.eq(time, 0.0)) {
+		return 0.0;
+	} else {
+		var t = time - 1;
+		var p = 0.3;
+		var s = 7.5e-2;
+		return 0 - (Math.pow(2, 10 * t) * _elm_lang$core$Basics$sin(((t - s) * (2 * _elm_lang$core$Basics$pi)) / p));
+	}
+};
+var _elm_community$easing_functions$Ease$outElastic = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inElastic);
+var _elm_community$easing_functions$Ease$inOutElastic = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inElastic, _elm_community$easing_functions$Ease$outElastic);
+var _elm_community$easing_functions$Ease$outBounce = function (time) {
+	var t4 = time - (2.625 / 2.75);
+	var t3 = time - (2.25 / 2.75);
+	var t2 = time - (1.5 / 2.75);
+	var a = 7.5625;
+	return (_elm_lang$core$Native_Utils.cmp(time, 1 / 2.75) < 0) ? ((a * time) * time) : ((_elm_lang$core$Native_Utils.cmp(time, 2 / 2.75) < 0) ? (((a * t2) * t2) + 0.75) : ((_elm_lang$core$Native_Utils.cmp(time, 2.5 / 2.75) < 0) ? (((a * t3) * t3) + 0.9375) : (((a * t4) * t4) + 0.984375)));
+};
+var _elm_community$easing_functions$Ease$inBounce = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$outBounce);
+var _elm_community$easing_functions$Ease$inOutBounce = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inBounce, _elm_community$easing_functions$Ease$outBounce);
+var _elm_community$easing_functions$Ease$inBack = function (time) {
+	return (time * time) * ((2.70158 * time) - 1.70158);
+};
+var _elm_community$easing_functions$Ease$outBack = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inBack);
+var _elm_community$easing_functions$Ease$inOutBack = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inBack, _elm_community$easing_functions$Ease$outBack);
+var _elm_community$easing_functions$Ease$outCirc = function (time) {
+	return _elm_lang$core$Basics$sqrt(
+		1 - Math.pow(time - 1, 2));
+};
+var _elm_community$easing_functions$Ease$inCirc = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$outCirc);
+var _elm_community$easing_functions$Ease$inOutCirc = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inCirc, _elm_community$easing_functions$Ease$outCirc);
+var _elm_community$easing_functions$Ease$inExpo = function (time) {
+	return _elm_lang$core$Native_Utils.eq(time, 0.0) ? 0.0 : Math.pow(2, 10 * (time - 1));
+};
+var _elm_community$easing_functions$Ease$outExpo = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inExpo);
+var _elm_community$easing_functions$Ease$inOutExpo = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inExpo, _elm_community$easing_functions$Ease$outExpo);
+var _elm_community$easing_functions$Ease$outSine = function (time) {
+	return _elm_lang$core$Basics$sin(time * (_elm_lang$core$Basics$pi / 2));
+};
+var _elm_community$easing_functions$Ease$inSine = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$outSine);
+var _elm_community$easing_functions$Ease$inOutSine = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inSine, _elm_community$easing_functions$Ease$outSine);
+var _elm_community$easing_functions$Ease$inQuint = function (time) {
+	return Math.pow(time, 5);
+};
+var _elm_community$easing_functions$Ease$outQuint = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inQuint);
+var _elm_community$easing_functions$Ease$inOutQuint = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inQuint, _elm_community$easing_functions$Ease$outQuint);
+var _elm_community$easing_functions$Ease$inQuart = function (time) {
+	return Math.pow(time, 4);
+};
+var _elm_community$easing_functions$Ease$outQuart = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inQuart);
+var _elm_community$easing_functions$Ease$inOutQuart = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inQuart, _elm_community$easing_functions$Ease$outQuart);
+var _elm_community$easing_functions$Ease$inCubic = function (time) {
+	return Math.pow(time, 3);
+};
+var _elm_community$easing_functions$Ease$outCubic = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inCubic);
+var _elm_community$easing_functions$Ease$inOutCubic = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inCubic, _elm_community$easing_functions$Ease$outCubic);
+var _elm_community$easing_functions$Ease$inQuad = function (time) {
+	return Math.pow(time, 2);
+};
+var _elm_community$easing_functions$Ease$outQuad = _elm_community$easing_functions$Ease$flip(_elm_community$easing_functions$Ease$inQuad);
+var _elm_community$easing_functions$Ease$inOutQuad = A2(_elm_community$easing_functions$Ease$inOut, _elm_community$easing_functions$Ease$inQuad, _elm_community$easing_functions$Ease$outQuad);
+var _elm_community$easing_functions$Ease$bezier = F5(
+	function (x1, y1, x2, y2, time) {
+		var pair = F4(
+			function (interpolate, _p1, _p0, v) {
+				var _p2 = _p1;
+				var _p3 = _p0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(interpolate, _p2._0, _p3._0, v),
+					_1: A3(interpolate, _p2._1, _p3._1, v)
+				};
+			});
+		var lerp = F3(
+			function (from, to, v) {
+				return from + ((to - from) * v);
+			});
+		var casteljau = function (ps) {
+			casteljau:
+			while (true) {
+				var _p4 = ps;
+				if (((_p4.ctor === '::') && (_p4._0.ctor === '_Tuple2')) && (_p4._1.ctor === '[]')) {
+					return _p4._0._1;
+				} else {
+					var _p5 = _p4;
+					var _v3 = A3(
+						_elm_lang$core$List$map2,
+						F2(
+							function (x, y) {
+								return A4(pair, lerp, x, y, time);
+							}),
+						_p5,
+						A2(
+							_elm_lang$core$Maybe$withDefault,
+							{ctor: '[]'},
+							_elm_lang$core$List$tail(_p5)));
+					ps = _v3;
+					continue casteljau;
+				}
+			}
+		};
+		return casteljau(
+			{
+				ctor: '::',
+				_0: {ctor: '_Tuple2', _0: 0, _1: 0},
+				_1: {
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: x1, _1: y1},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: x2, _1: y2},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 1, _1: 1},
+							_1: {ctor: '[]'}
+						}
+					}
+				}
+			});
+	});
+var _elm_community$easing_functions$Ease$linear = _elm_lang$core$Basics$identity;
+
 //import Native.List //
 
 var _elm_lang$core$Native_Array = function() {
@@ -10427,28 +10566,32 @@ var _Soreine$water_writing$Main$progress = F3(
 		var normX = A3(_elm_lang$core$Basics$clamp, min, max, x);
 		return (normX - min) / (max - min);
 	});
-var _Soreine$water_writing$Main$cursor = function (startedTyping) {
-	var _p1 = startedTyping;
-	if (_p1.ctor === 'Just') {
-		return A2(
-			_elm_lang$html$Html$span,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('cursor'),
-				_1: {ctor: '[]'}
-			},
-			{ctor: '[]'});
-	} else {
-		return A2(
-			_elm_lang$html$Html$span,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('cursor start-visible'),
-				_1: {ctor: '[]'}
-			},
-			{ctor: '[]'});
-	}
-};
+var _Soreine$water_writing$Main$cursor = F2(
+	function (startedTyping, emptyStrokes) {
+		var _p1 = startedTyping;
+		if (_p1.ctor === 'Just') {
+			return emptyStrokes ? A2(
+				_elm_lang$html$Html$span,
+				{ctor: '[]'},
+				{ctor: '[]'}) : A2(
+				_elm_lang$html$Html$span,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('cursor'),
+					_1: {ctor: '[]'}
+				},
+				{ctor: '[]'});
+		} else {
+			return A2(
+				_elm_lang$html$Html$span,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('cursor start-visible'),
+					_1: {ctor: '[]'}
+				},
+				{ctor: '[]'});
+		}
+	});
 var _Soreine$water_writing$Main$logError = _elm_lang$core$Result$mapError(
 	function (err) {
 		return A2(
@@ -10473,31 +10616,49 @@ var _Soreine$water_writing$Main$init = {
 	_1: _elm_lang$core$Platform_Cmd$none
 };
 var _Soreine$water_writing$Main$fadingDelay = 8 * _elm_lang$core$Time$second;
-var _Soreine$water_writing$Main$cleanupStrokes = function (model) {
-	var isOldLineBreak = function (_p2) {
+var _Soreine$water_writing$Main$isOld = F2(
+	function (now, _p2) {
 		var _p3 = _p2;
-		return _elm_lang$core$Native_Utils.eq(_p3._1, '\n') && (_elm_lang$core$Native_Utils.cmp(model.now - _p3._0, _Soreine$water_writing$Main$fadingDelay) > 0);
+		return _elm_lang$core$Native_Utils.cmp(now - _p3._0, _Soreine$water_writing$Main$fadingDelay) > 0;
+	});
+var _Soreine$water_writing$Main$cleanupLines = function (model) {
+	var isBreak = function (_p4) {
+		var _p5 = _p4;
+		return _elm_lang$core$Native_Utils.eq(_p5._1, '\n');
+	};
+	var isOldBreak = function (stroke) {
+		return A2(_Soreine$water_writing$Main$isOld, model.now, stroke) && isBreak(stroke);
 	};
 	var cleaned = _elm_lang$core$List$reverse(
 		A2(
 			_elm_community$list_extra$List_Extra$takeWhile,
-			function (_p4) {
-				return !isOldLineBreak(_p4);
+			function (_p6) {
+				return !isOldBreak(_p6);
 			},
 			_elm_lang$core$List$reverse(model.strokes)));
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{strokes: cleaned});
 };
+var _Soreine$water_writing$Main$cleanupStrokes = function (model) {
+	return A2(
+		_elm_lang$core$List$all,
+		_Soreine$water_writing$Main$isOld(model.now),
+		model.strokes) ? _elm_lang$core$Native_Utils.update(
+		model,
+		{
+			strokes: {ctor: '[]'}
+		}) : model;
+};
 var _Soreine$water_writing$Main$renderStroke = F2(
-	function (now, _p5) {
-		var _p6 = _p5;
-		var _p7 = _p6._1;
-		var age = now - _p6._0;
+	function (now, _p7) {
+		var _p8 = _p7;
+		var _p9 = _p8._1;
+		var age = now - _p8._0;
 		var prog = A3(_Soreine$water_writing$Main$progress, 0, _Soreine$water_writing$Main$fadingDelay, age);
-		var opacity = 1 - (prog * prog);
-		var blur = (prog * prog) * 5;
-		return _elm_lang$core$Native_Utils.eq(_p7, '\n') ? A2(
+		var opacity = 1 - _elm_community$easing_functions$Ease$inQuad(prog);
+		var blur = _elm_community$easing_functions$Ease$inQuad(prog) * 5;
+		return _elm_lang$core$Native_Utils.eq(_p9, '\n') ? A2(
 			_elm_lang$html$Html$br,
 			{ctor: '[]'},
 			{ctor: '[]'}) : A2(
@@ -10513,7 +10674,7 @@ var _Soreine$water_writing$Main$renderStroke = F2(
 			},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text(_p7),
+				_0: _elm_lang$html$Html$text(_p9),
 				_1: {ctor: '[]'}
 			});
 	});
@@ -10527,9 +10688,9 @@ var _Soreine$water_writing$Main$Dated = F2(
 	});
 var _Soreine$water_writing$Main$updateStroke = F3(
 	function (now, stroke, string) {
-		var _p8 = stroke;
-		var time = _p8._0;
-		var str = _p8._1;
+		var _p10 = stroke;
+		var time = _p10._0;
+		var str = _p10._1;
 		return _elm_lang$core$Native_Utils.eq(str, string) ? stroke : A2(_Soreine$water_writing$Main$Dated, now, string);
 	});
 var _Soreine$water_writing$Main$newInput = F2(
@@ -10555,23 +10716,23 @@ var _Soreine$water_writing$Main$newInput = F2(
 var _Soreine$water_writing$Main$NoOp = {ctor: 'NoOp'};
 var _Soreine$water_writing$Main$focusInput = A2(
 	_elm_lang$core$Task$attempt,
-	function (_p9) {
+	function (_p11) {
 		return A2(
 			_elm_lang$core$Basics$always,
 			_Soreine$water_writing$Main$NoOp,
-			_Soreine$water_writing$Main$logError(_p9));
+			_Soreine$water_writing$Main$logError(_p11));
 	},
 	_elm_lang$dom$Dom$focus('hidden-input'));
 var _Soreine$water_writing$Main$update = F2(
 	function (msg, model) {
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p12 = msg;
+		switch (_p12.ctor) {
 			case 'TypeText':
 				return {
 					ctor: '_Tuple2',
 					_0: _Soreine$water_writing$Main$startTyping(
-						_Soreine$water_writing$Main$cleanupStrokes(
-							A2(_Soreine$water_writing$Main$newInput, _p10._0, model))),
+						_Soreine$water_writing$Main$cleanupLines(
+							A2(_Soreine$water_writing$Main$newInput, _p12._0, model))),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'InputBlurred':
@@ -10579,9 +10740,12 @@ var _Soreine$water_writing$Main$update = F2(
 			case 'Tick':
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{now: _p10._0}),
+					_0: function () {
+						var cleaned = _Soreine$water_writing$Main$cleanupStrokes(model);
+						return _elm_lang$core$Native_Utils.update(
+							cleaned,
+							{now: _p12._0});
+					}(),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
@@ -10643,23 +10807,23 @@ var _Soreine$water_writing$Main$hiddenInput = function (val) {
 		},
 		{ctor: '[]'});
 };
-var _Soreine$water_writing$Main$view = function (_p11) {
-	var _p12 = _p11;
-	var _p15 = _p12.strokes;
+var _Soreine$water_writing$Main$view = function (_p13) {
+	var _p14 = _p13;
+	var _p17 = _p14.strokes;
 	var strokesToText = A2(
 		_elm_lang$core$String$join,
 		'',
 		A2(
 			_elm_lang$core$List$map,
-			function (_p13) {
-				var _p14 = _p13;
-				return _p14._1;
+			function (_p15) {
+				var _p16 = _p15;
+				return _p16._1;
 			},
-			_p15));
+			_p17));
 	var written = A2(
 		_elm_lang$core$List$map,
-		_Soreine$water_writing$Main$renderStroke(_p12.now),
-		_p15);
+		_Soreine$water_writing$Main$renderStroke(_p14.now),
+		_p17);
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -10681,7 +10845,10 @@ var _Soreine$water_writing$Main$view = function (_p11) {
 					written,
 					{
 						ctor: '::',
-						_0: _Soreine$water_writing$Main$cursor(_p12.startedTyping),
+						_0: A2(
+							_Soreine$water_writing$Main$cursor,
+							_p14.startedTyping,
+							_elm_lang$core$List$isEmpty(_p17)),
 						_1: {ctor: '[]'}
 					})),
 			_1: {
