@@ -220,7 +220,7 @@ view { now, strokes, startedTyping } =
         div [ id "wall" ]
             [ span [ class "writing" ]
                 (written
-                    ++ [ cursor startedTyping ]
+                    ++ [ cursor startedTyping (List.isEmpty strokes) ]
                 )
             , hiddenInput strokesToText
             ]
@@ -230,11 +230,16 @@ view { now, strokes, startedTyping } =
 -- ELEMENTS
 
 
-cursor : Maybe (Time) -> Html Msg
-cursor startedTyping =
+cursor : Maybe (Time) -> Bool -> Html Msg
+cursor startedTyping emptyStrokes =
     case startedTyping of
         Just v ->
-            span [ class "cursor" ] []
+            if (emptyStrokes) then
+                -- After a complete cleanup, we don't want to reset
+                -- the cursor animation, it should not be visible
+                span [] []
+            else
+                span [ class "cursor" ] []
 
         Nothing ->
             span [ class "cursor start-visible" ] []
