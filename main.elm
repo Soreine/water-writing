@@ -80,7 +80,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         TypeText text ->
-            ( model |> (newInput text) |> cleanupStrokes |> startTyping
+            ( model |> (newInput text) |> cleanupLines |> startTyping
             , Cmd.none
             )
 
@@ -88,7 +88,11 @@ update msg model =
             ( model, focusInput )
 
         Tick newTime ->
-            ( { model | now = newTime }
+            ( let
+                cleaned =
+                    cleanupStrokes model
+              in
+                { cleaned | now = newTime }
             , Cmd.none
             )
 
@@ -138,22 +142,42 @@ updateStroke now stroke string =
             Dated now string
 
 
+{-| True if the stroke has disappeared
+-}
+isOld : Time -> Stroke -> Bool
+isOld now (Dated time txt) =
+    now - time > fadingDelay
+
+
 {-| Remove all lines of strokes that have completely disappeared.
 -}
-cleanupStrokes : Model -> Model
-cleanupStrokes model =
+cleanupLines : Model -> Model
+cleanupLines model =
     let
-        isOldLineBreak (Dated time txt) =
-            (txt == "\n") && (model.now - time > fadingDelay)
+        isBreak (Dated time txt) =
+            txt == "\n"
+
+        isOldBreak stroke =
+            isOld model.now stroke && isBreak stroke
 
         cleaned =
             -- Assuming strokes are in a chronological sequence.
             model.strokes
                 |> List.reverse
-                |> List.Extra.takeWhile (not << isOldLineBreak)
+                |> List.Extra.takeWhile (not << isOldBreak)
                 |> List.reverse
     in
         { model | strokes = cleaned }
+
+
+{-| Remove all strokes if they all disappeared
+-}
+cleanupStrokes : Model -> Model
+cleanupStrokes model =
+    if model.strokes |> List.all (isOld model.now) then
+        { model | strokes = [] }
+    else
+        model
 
 
 focusInput : Cmd Msg
