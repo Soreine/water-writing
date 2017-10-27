@@ -10743,6 +10743,8 @@ var _Soreine$water_writing$Main$update = F2(
 							A2(_Soreine$water_writing$Main$newInput, _p12._0, model))),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
+			case 'WallClick':
+				return {ctor: '_Tuple2', _0: model, _1: _Soreine$water_writing$Main$focusInput};
 			case 'InputBlurred':
 				return {ctor: '_Tuple2', _0: model, _1: _Soreine$water_writing$Main$focusInput};
 			case 'Tick':
@@ -10766,6 +10768,7 @@ var _Soreine$water_writing$Main$Tick = function (a) {
 var _Soreine$water_writing$Main$subscriptions = function (model) {
 	return _elm_lang$animation_frame$AnimationFrame$times(_Soreine$water_writing$Main$Tick);
 };
+var _Soreine$water_writing$Main$WallClick = {ctor: 'WallClick'};
 var _Soreine$water_writing$Main$InputBlurred = {ctor: 'InputBlurred'};
 var _Soreine$water_writing$Main$TypeText = function (a) {
 	return {ctor: 'TypeText', _0: a};
@@ -10837,7 +10840,11 @@ var _Soreine$water_writing$Main$view = function (_p13) {
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$id('wall'),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(_Soreine$water_writing$Main$WallClick),
+				_1: {ctor: '[]'}
+			}
 		},
 		{
 			ctor: '::',
