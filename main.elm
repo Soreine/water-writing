@@ -5,7 +5,7 @@ import Dom
 import Ease
 import Html exposing (Html, Attribute, div, span, textarea, text, br)
 import Html.Attributes exposing (..)
-import Html.Events exposing (on, onInput, onBlur, defaultOptions)
+import Html.Events exposing (on, onInput, onClick, onBlur, defaultOptions)
 import Json.Decode as Decode
 import Task
 import Time exposing (Time, second)
@@ -72,6 +72,7 @@ init =
 type Msg
     = TypeText String
     | InputBlurred
+    | WallClick
     | Tick Time
     | NoOp
 
@@ -83,6 +84,9 @@ update msg model =
             ( model |> (newInput text) |> cleanupLines |> startTyping
             , Cmd.none
             )
+
+        WallClick ->
+            ( model, focusInput )
 
         InputBlurred ->
             ( model, focusInput )
@@ -217,7 +221,7 @@ view { now, strokes, startedTyping } =
         strokesToText =
             strokes |> List.map (\(Dated _ str) -> str) |> String.join ""
     in
-        div [ id "wall" ]
+        div [ id "wall", onClick WallClick ]
             [ span [ class "writing" ]
                 (written
                     ++ [ cursor startedTyping (List.isEmpty strokes) ]
