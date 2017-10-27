@@ -1,6 +1,10 @@
 # Water Writing
 
-Writing does not have to be persistent. Watch the video below...
+Writing does not have to be persistent. [See by yourself](https://soreine.github.io/water-writing)
+
+## Why?
+
+Watch the video below...
 
 [![Youtube Video](video-preview.png)](https://www.youtube.com/watch?v=SXCXHed3GC8&feature=youtu.be&t=40m38s)
 
