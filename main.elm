@@ -239,10 +239,10 @@ cursor startedTyping emptyStrokes =
                 -- the cursor animation, it should not be visible
                 span [] []
             else
-                span [ class "cursor" ] []
+                span [ class "cursor" ] [ text "▏" ]
 
         Nothing ->
-            span [ class "cursor start-visible" ] []
+            span [ class "cursor start-visible" ] [ text "▏" ]
 
 
 {-| Invisibile input used to capture text input. Always focused

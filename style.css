@@ -19,14 +19,6 @@
     cursor: default;
 }
 
-.cursor {
-    display: inline-block;
-    vertical-align: text-top;
-    width: 0.1em;
-    height: 1em; /* a whole character height */
-    background-color: #515151;
-}
-
 /* Blinking */
 
 .cursor {
