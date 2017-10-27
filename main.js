@@ -10580,7 +10580,11 @@ var _Soreine$water_writing$Main$cursor = F2(
 					_0: _elm_lang$html$Html_Attributes$class('cursor'),
 					_1: {ctor: '[]'}
 				},
-				{ctor: '[]'});
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('▏'),
+					_1: {ctor: '[]'}
+				});
 		} else {
 			return A2(
 				_elm_lang$html$Html$span,
@@ -10589,7 +10593,11 @@ var _Soreine$water_writing$Main$cursor = F2(
 					_0: _elm_lang$html$Html_Attributes$class('cursor start-visible'),
 					_1: {ctor: '[]'}
 				},
-				{ctor: '[]'});
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('▏'),
+					_1: {ctor: '[]'}
+				});
 		}
 	});
 var _Soreine$water_writing$Main$logError = _elm_lang$core$Result$mapError(
